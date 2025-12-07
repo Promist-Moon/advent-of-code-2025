@@ -12,10 +12,12 @@ public class DaySeven {
 
         int splits = countSplits(grid);
         System.out.println("Total splits = " + splits);
+
+        long timelines = countTimelines(grid);
+        System.out.println("Total timelines = " + timelines);
     }
 
-    private static int countSplits(List<String> grid) {
-        int splits = 0;
+    private static int[] findSource(List<String> grid) {
         int rows = grid.size();
         int cols = grid.get(0).length();
 
@@ -34,6 +36,20 @@ public class DaySeven {
         if (sourceRow == -1) {
             throw new IllegalArgumentException("No source 'S' found in grid");
         }
+
+        int[] source = { sourceRow, sourceCol };
+        return source;
+    }
+
+    private static int countSplits(List<String> grid) {
+        int splits = 0;
+        int rows = grid.size();
+        int cols = grid.get(0).length();
+
+        // find source
+        int[] source = findSource(grid);
+        int sourceRow = source[0];
+        int sourceCol = source[1];
 
         // make a boolean row to keep track of columns with beams
         boolean[] beamColumns = new boolean[cols];
@@ -58,5 +74,51 @@ public class DaySeven {
         }
 
         return splits;
+    }
+
+    private static long countTimelines(List<String> grid) {
+        long timelines = 1L;
+        int rows = grid.size();
+        int cols = grid.get(0).length();
+
+        // find source
+        int[] source = findSource(grid);
+        int sourceRow = source[0];
+        int sourceCol = source[1];
+
+        // make a boolean row to keep track of possible columns with beams
+        long[] beamColumns = new long[cols];
+        beamColumns[sourceCol] = 1L;
+
+        for (int r=sourceRow + 1; r < rows; r++) {
+            long[] next = new long[cols];
+            for (int c=0; c<cols; c++) {
+                long count = beamColumns[c];
+                if (count == 0) {
+                    continue; // no beam in this column
+                }
+
+                char cell = grid.get(r).charAt(c);
+
+                if (cell == '^') {
+                    // split the beam
+                    if (c - 1 >= 0) {
+                        next[c - 1] += count;
+                    }
+                    if (c + 1 < cols) {
+                        next[c + 1] += count;
+                    }
+
+                    timelines += count;
+                } else {
+                    if (r + 1 < rows) {
+                        next[c] += count;
+                    }
+                }
+            }
+            beamColumns = next;
+        }
+
+        return timelines;
     }
 }
