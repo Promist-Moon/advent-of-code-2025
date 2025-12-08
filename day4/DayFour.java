@@ -3,6 +3,7 @@ package day4;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -14,8 +15,31 @@ public class DayFour {
 
         int rolls = countRolls(grid);
         System.out.println("Total rolls accessed = " + rolls);
+
+        int rollIterations = countTotalRolls(grid);
+        System.out.println("Total rolls accessed after many iterations = " + rollIterations);
     }
 
+    private static int countTotalRolls(List<String> grid) {
+        List<String> g = grid;
+        int count = countRolls(grid);
+        int total = count;
+
+        while (count != 0) {
+            g = removeRolls(g);
+            count = countRolls(g);
+            total += count;
+        }
+
+        return total;
+    }
+
+    /**
+     * Counts number of accessible rolls by a forklift in a grid.
+     *
+     * @param grid
+     * @return
+     */
     private static int countRolls(List<String> grid) {
         int rows = grid.size();
         int cols = grid.get(0).length();
@@ -32,6 +56,39 @@ public class DayFour {
         return count;
     }
 
+    private static List<String> removeRolls(List<String> grid) {
+        List<StringBuilder> newGrid = new ArrayList<>();
+        for (String row : grid) {
+            newGrid.add(new StringBuilder(row));
+        }
+
+        int rows = grid.size();
+        int cols = grid.get(0).length();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (isAccessible(grid, i, j)) {
+                    newGrid.get(i).setCharAt(j, '.');
+                }
+            }
+        }
+
+        List<String> result = newGrid.stream()
+                .map(StringBuilder::toString)
+                .toList(); // Java 16+
+
+        return result;
+    }
+
+    /**
+     * Checks whether a character is accessible by checking if there are fewer than four
+     * adjacent rolls.
+     *
+     * @param grid
+     * @param row
+     * @param col
+     * @return
+     */
     private static boolean isAccessible(List<String> grid, int row, int col) {
         if (getCharacter(grid, row, col) != '@') {
             return false;
