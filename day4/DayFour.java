@@ -20,6 +20,12 @@ public class DayFour {
         System.out.println("Total rolls accessed after many iterations = " + rollIterations);
     }
 
+    /**
+     * Counts the total rolls accessed after multiple iterations.
+     *
+     * @param grid
+     * @return integer total
+     */
     private static int countTotalRolls(List<String> grid) {
         List<String> g = grid;
         int count = countRolls(grid);
@@ -110,6 +116,14 @@ public class DayFour {
         return count < 4;
     }
 
+    /**
+     * Gets the character at a specific coordinate in a grid.
+     *
+     * @param grid
+     * @param row
+     * @param col
+     * @return
+     */
     private static char getCharacter(List<String> grid, int row, int col) {
         return grid.get(row).charAt(col);
     }
