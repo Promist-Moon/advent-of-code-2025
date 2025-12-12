@@ -46,4 +46,9 @@ public class Pair {
 
         return pairs;
     }
+
+    @Override
+    public String toString() {
+        return c1.toString() + "& " + c2.toString();
+    }
 }

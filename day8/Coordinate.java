@@ -66,6 +66,10 @@ public class Coordinate {
         return Math.sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
     }
 
+    public long getX() {
+        return this.x;
+    }
+
     @Override
     public String toString() {
         return "(" + x + ", " + y + ", " + z + ")";
