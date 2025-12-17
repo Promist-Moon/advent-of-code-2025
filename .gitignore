@@ -1,5 +1,6 @@
 # Compiled classes
 out/
+lib/
 
 # Default ignored files
 .idea/shelf/
