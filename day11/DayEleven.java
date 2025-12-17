@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -16,9 +18,9 @@ public class DayEleven {
         List<String> deviceStrings = Files.readAllLines(Paths.get(filename));
         Map<String, Device> devices = parseDevices(deviceStrings);
 
-        //List<List<Device>> paths = findAllPaths(devices, "svr", "out");
+        List<List<Device>> paths = findAllPaths(devices, "svr", "out");
 
-        //System.out.println("Total paths svr -> out: " + paths );
+        System.out.println("Total paths svr -> out: " + paths );
 
 
          List<String> pitstops = new ArrayList<>();
@@ -26,7 +28,8 @@ public class DayEleven {
          pitstops.add("fft");
 
         //List<List<Device>> pathsWithStops = findAllPathsWithStops(devices, "svr", "out", pitstops);
-        System.out.println("Total paths with stops: " + countAllPathsWithStops(devices, "svr", "out", pitstops) + countAllPathsWithStops(devices, "svr", "out", pitstops.reversed()));
+        long sum = countAllPathsWithStops(devices, "svr", "out", pitstops) + countAllPathsWithStops(devices, "svr", "out", pitstops.reversed());
+        System.out.println("Total paths with stops: " + sum);
 
     }
 
@@ -77,41 +80,78 @@ public class DayEleven {
         List<Device> stops = new ArrayList<>();
         for (String s : stopStrings) {
             stops.add(devices.get(s));
-            System.out.println("device = " + devices.get(s));
         }
 
-        // state 0 if at svr
-        // state 1 if passed dac/fft
-        // state 2 if passed fft/dac
-        // state 3 if passed out
+        List<Device> devicesSorted = topoSortAllDevices(devices.values());
 
-        Queue<NewState> queue = new ArrayDeque<>();
-        queue.add(new NewState(source, 0));
+        Map<Device, long[]> ways = new HashMap<>();
+        for (Device d : devices.values()) {
+            ways.put(d, new long[stops.size() + 1]);
+        }
+        ways.get(source)[0] = 1;
 
-        long count = 0;
+        for (Device current : devicesSorted) {
+            long[] curWays = ways.get(current);
+
+            for (Device next : current.getOutputs()) {
+                long[] nextWays = ways.get(next);
+
+                for (int k = 0; k <= stops.size(); k++) {
+                    long add = curWays[k];
+                    if (add == 0) continue;
+
+                    int nextStop = k;
+                    if (k < stops.size() && next.equals(stops.get(k))) {
+                        nextStop = k + 1;
+                    }
+
+                    nextWays[nextStop] += add;
+                }
+            }
+        }
+
+        return ways.get(destination)[stops.size()];
+    }
+
+    private static List<Device> topoSortAllDevices(Collection<Device> devices) {
+        Map<Device, Integer> indegree = new HashMap<>();
+        for (Device d : devices) {
+            indegree.put(d, 0);
+        }
+
+        for (Device u : devices) {
+            for (Device v : u.getOutputs()) {
+                indegree.put(v, indegree.get(v) + 1);
+            }
+        }
+
+        // queue of nodes with indegree 0
+        Queue<Device> queue = new ArrayDeque<>();
+        for (Map.Entry<Device, Integer> e : indegree.entrySet()) {
+            if (e.getValue() == 0) {
+                queue.add(e.getKey());
+            }
+        }
+
+        List<Device> topo = new ArrayList<>();
 
         while (!queue.isEmpty()) {
-            NewState current = queue.poll();
+            Device u = queue.poll();
+            topo.add(u);
 
-            if (current.current.equals(destination)) {
-                if (current.stop == stops.size()) {
-                    count++;
+            for (Device v : u.getOutputs()) {
+                indegree.put(v, indegree.get(v) - 1);
+                if (indegree.get(v) == 0) {
+                    queue.add(v);
                 }
-                continue;
-            }
-
-            for (Device next : current.current.getOutputs()) {
-                int nextStop = current.stop;
-
-                if (nextStop < stops.size() && next.equals(stops.get(nextStop))) {
-                    nextStop++;
-                }
-
-                queue.add(new NewState(next, nextStop));
             }
         }
 
-        return count;
+        if (topo.size() != devices.size()) {
+            throw new IllegalStateException("Graph is not a DAG (cycle detected)");
+        }
+
+        return topo;
     }
 
     private static class State {
@@ -121,16 +161,6 @@ public class DayEleven {
         public State(Device current, List<Device> path) {
             this.current = current;
             this.path = path;
-        }
-    }
-
-    private static class NewState {
-        Device current;
-        int stop;
-
-        public NewState(Device current, int stop) {
-            this.current = current;
-            this.stop = stop;
         }
     }
 }
