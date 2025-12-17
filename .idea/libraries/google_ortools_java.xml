@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="google.ortools.java" type="repository">
+    <properties maven-id="com.google.ortools:ortools-java:9.14.6206" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/ortools-java-9.14.6206.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ortools-linux-x86-64-9.14.6206.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ortools-darwin-x86-64-9.14.6206.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ortools-win32-x86-64-9.14.6206.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ortools-linux-aarch64-9.14.6206.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ortools-darwin-aarch64-9.14.6206.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jna-platform-5.14.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jna-5.14.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/protobuf-java-4.31.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
